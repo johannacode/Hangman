@@ -1,0 +1,56 @@
+{
+  "window": {
+    "width": 600,
+    "height": 600,
+    "title": "Le Pendu",
+    "fps": 60
+  },
+  "game": {
+    "max_errors": 6,
+    "default_difficulty": "medium",
+    "language": "fr",
+    "language": "en"
+  },
+  "colors": {
+    "background": [
+      30,
+      30,
+      46
+    ],
+    "text_primary": [
+      205,
+      214,
+      244
+    ],
+    "text_secondary": [
+      166,
+      173,
+      200
+    ],
+    "accent": [
+      137,
+      180,
+      250
+    ],
+    "success": [
+      166,
+      227,
+      161
+    ],
+    "error": [
+      243,
+      139,
+      168
+    ],
+    "hangman": [
+      205,
+      214,
+      244
+    ],
+    "gallows": [
+      127,
+      132,
+      156
+    ]
+  }
+}

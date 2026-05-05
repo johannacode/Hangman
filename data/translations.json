@@ -1,0 +1,149 @@
+{
+  "fr": {
+    "meta": {
+      "name": "Français",
+      "flag": "🇫🇷",
+      "code": "fr"
+    },
+    "menu": {
+      "title": "Le Pendu",
+      "play": "Jouer",
+      "leaderboard": "Meilleurs scores",
+      "quit": "Quitter",
+      "choose_difficulty": "Choisir la difficulté",
+      "choose_category": "Choisir une catégorie",
+      "choose_language": "Langue",
+      "all_categories": "Toutes"
+    },
+    "difficulty": {
+      "label": "Difficulté",
+      "easy": "Facile",
+      "medium": "Moyen",
+      "hard": "Difficile"
+    },
+    "categories": {
+      "animaux": "Animaux",
+      "maison": "Maison",
+      "nature": "Nature",
+      "informatique": "Informatique",
+      "sport": "Sport",
+      "cuisine": "Cuisine",
+      "science": "Science",
+      "culture": "Culture"
+    },
+    "game": {
+      "errors": "Erreurs",
+      "attempts": "Tentatives",
+      "guessed_letters": "Lettres trouvées",
+      "remaining": "restantes",
+      "hint": "Catégorie",
+      "press_key": "Appuie sur une lettre...",
+      "already_tried": "Déjà essayé !",
+      "good_guess": "Bonne lettre !",
+      "wrong_guess": "Raté !"
+    },
+    "result": {
+      "win_title": "Bravo !",
+      "lose_title": "Perdu !",
+      "win_message": "Tu as trouvé le mot",
+      "lose_message": "Le mot était",
+      "attempts_label": "en {n} tentative(s)",
+      "new_record": "Nouveau record ! 🏆",
+      "record_info": "Le record est {n} tentative(s)",
+      "play_again": "Rejouer  [R]",
+      "main_menu": "Menu  [M]",
+      "quit": "Quitter  [Q]"
+    },
+    "leaderboard": {
+      "title": "Meilleurs scores",
+      "rank": "Rang",
+      "date": "Date",
+      "word": "Mot",
+      "difficulty": "Niveau",
+      "attempts": "Tentatives",
+      "duration": "Durée",
+      "seconds": "s",
+      "empty": "Aucun score enregistré pour l'instant.",
+      "back": "Retour  [Échap]"
+    },
+    "errors": {
+      "load_words": "Impossible de charger les mots.",
+      "load_scores": "Impossible de charger les scores.",
+      "save_scores": "Impossible de sauvegarder le score."
+    }
+  },
+
+  "en": {
+    "meta": {
+      "name": "English",
+      "flag": "🇬🇧",
+      "code": "en"
+    },
+    "menu": {
+      "title": "Hangman",
+      "play": "Play",
+      "leaderboard": "Leaderboard",
+      "quit": "Quit",
+      "choose_difficulty": "Choose difficulty",
+      "choose_category": "Choose a category",
+      "choose_language": "Language",
+      "all_categories": "All"
+    },
+    "difficulty": {
+      "label": "Difficulty",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "categories": {
+      "animals": "Animals",
+      "house": "House",
+      "nature": "Nature",
+      "computing": "Computing",
+      "sport": "Sport",
+      "food": "Food",
+      "science": "Science",
+      "culture": "Culture"
+    },
+    "game": {
+      "errors": "Errors",
+      "attempts": "Attempts",
+      "guessed_letters": "Found letters",
+      "remaining": "remaining",
+      "hint": "Category",
+      "press_key": "Press a letter...",
+      "already_tried": "Already tried!",
+      "good_guess": "Good guess!",
+      "wrong_guess": "Wrong!"
+    },
+    "result": {
+      "win_title": "You won!",
+      "lose_title": "Game over!",
+      "win_message": "You guessed the word",
+      "lose_message": "The word was",
+      "attempts_label": "in {n} attempt(s)",
+      "new_record": "New record! 🏆",
+      "record_info": "The record is {n} attempt(s)",
+      "play_again": "Play again  [R]",
+      "main_menu": "Menu  [M]",
+      "quit": "Quit  [Q]"
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "rank": "Rank",
+      "date": "Date",
+      "word": "Word",
+      "difficulty": "Level",
+      "attempts": "Attempts",
+      "duration": "Duration",
+      "seconds": "s",
+      "empty": "No scores recorded yet.",
+      "back": "Back  [Esc]"
+    },
+    "errors": {
+      "load_words": "Unable to load words.",
+      "load_scores": "Unable to load scores.",
+      "save_scores": "Unable to save score."
+    }
+  }
+}

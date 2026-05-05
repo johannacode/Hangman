@@ -1,0 +1,35 @@
+{
+  "record": 2,
+  "scores": [
+    {
+      "date": "2026-05-05",
+      "time": "10:43",
+      "word": "python",
+      "difficulty": "medium",
+      "category": "informatique",
+      "attempts": 3,
+      "errors": 1,
+      "duration_seconds": 60
+    },
+    {
+      "date": "2025-01-15",
+      "time": "14:32",
+      "word": "python",
+      "difficulty": "medium",
+      "category": "informatique",
+      "attempts": 2,
+      "errors": 0,
+      "duration_seconds": 45
+    },
+    {
+      "date": "2025-01-14",
+      "time": "10:18",
+      "word": "chat",
+      "difficulty": "easy",
+      "category": "animaux",
+      "attempts": 3,
+      "errors": 1,
+      "duration_seconds": 30
+    }
+  ]
+}

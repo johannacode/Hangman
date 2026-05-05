@@ -1,0 +1,39 @@
+{
+  "_comment": "Mots groupés par langue > difficulté > catégorie",
+
+  "en": {
+    "easy": {
+      "animals": ["cat", "dog", "bear", "wolf", "cow", "duck", "mouse", "tiger", "horse", "frog"],
+      "house":   ["bed", "door", "wall", "roof", "lamp", "table", "chair", "floor", "window", "kitchen"],
+      "nature":  ["tree", "flower", "grass", "cloud", "rain", "snow", "sun", "wind", "stone", "river"]
+    },
+    "medium": {
+      "computing": ["python", "keyboard", "window", "file", "loop", "array", "variable", "function", "module", "class"],
+      "sport":     ["football", "tennis", "swimming", "cycling", "climbing", "diving", "karate", "boxing", "handball", "baseball"],
+      "food":      ["chocolate", "cheese", "mushroom", "pepper", "eggplant", "zucchini", "salmon", "chicken", "pancake", "burger"]
+    },
+    "hard": {
+      "computing": ["algorithm", "library", "cryptography", "recursion", "polymorphism", "architecture", "refactoring", "debugging", "compiler", "interpreter"],
+      "science":   ["photosynthesis", "thermodynamics", "electromagnetism", "spectroscopy", "biomechanics", "astrophysics", "nanotechnology", "biochemistry", "epidemiology", "neuroscience"],
+      "culture":   ["philosophy", "psychology", "anthropology", "cinematography", "gastronomy", "numismatics", "calligraphy", "paleontology", "meteorology", "archaeology"]
+    }
+  },
+
+  "fr": {
+    "easy": {
+    "animaux": ["chat", "chien", "lapin", "ours", "loup", "vache", "poule", "canard", "souris", "tigre"],
+    "maison": ["lit", "porte", "mur", "toit", "sol", "lampe", "table", "chaise", "armoire", "cuisine"],
+    "nature": ["arbre", "fleur", "herbe", "nuage", "pluie", "neige", "soleil", "vent", "pierre", "riviere"]
+  },
+  "medium": {
+    "informatique": ["python", "clavier", "fenetre", "fichier", "boucle", "tableau", "variable", "fonction", "module", "classe"],
+    "sport": ["football", "tennis", "natation", "cyclisme", "escalade", "plongee", "karate", "boxe", "equitation", "handball"],
+    "cuisine": ["chocolat", "fromage", "boulanger", "patisserie", "champignon", "poivron", "aubergine", "courgette", "saumon", "poulet"]
+  },
+  "hard": {
+    "informatique": ["algorithme", "bibliotheque", "cryptographie", "recursivite", "polymorphisme", "architecture", "refactoring", "debuggage", "compilateur", "interpreteur"],
+    "science": ["photosynthese", "thermostatique", "electromagnetisme", "thermodynamique", "spectroscopie", "biomecanique", "astrophysique", "nanotechnologie", "biochimie", "epidemiologie"],
+    "culture": ["philosophie", "psychologie", "anthropologie", "cinematographie", "gastronomique", "numismatique", "archivistique", "calligraphie", "palaeontologie", "meteorologie"]
+    }
+  }
+}
