@@ -3,6 +3,16 @@
   "scores": [
     {
       "date": "2026-05-05",
+      "time": "15:28",
+      "word": "mur",
+      "difficulty": "easy",
+      "category": "maison",
+      "attempts": 7,
+      "errors": 4,
+      "duration_seconds": 13
+    },
+    {
+      "date": "2026-05-05",
       "time": "15:09",
       "word": "lapin",
       "difficulty": "easy",
