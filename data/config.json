@@ -8,7 +8,7 @@
   "game": {
     "max_errors": 10,
     "default_difficulty": "medium",
-    "language": "en"
+    "language": "fr"
   },
   "colors": {
     "background": [
