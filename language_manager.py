@@ -26,9 +26,7 @@ class LanguageManager:
         self._load_translations()
         self._load_saved_language()
 
-    # ──────────────────────────────────────────
-    #  Chargement
-    # ──────────────────────────────────────────
+    #  Chargement #
 
     def _load_translations(self) -> None:
         """Charge le fichier translations.json."""
@@ -64,9 +62,7 @@ class LanguageManager:
         except (FileNotFoundError, json.JSONDecodeError, OSError):
             pass  # On ne bloque pas le jeu si la sauvegarde échoue
 
-    # ──────────────────────────────────────────
-    #  API publique
-    # ──────────────────────────────────────────
+    # API publique #  
 
     @property
     def current(self) -> str:
@@ -150,15 +146,11 @@ class LanguageManager:
         return self._translations.get(self._current, {}).get("meta", {}).get("name", self._current)
 
 
-# ──────────────────────────────────────────
-#  Singleton global — importé par les autres modules
-# ──────────────────────────────────────────
+# Singleton global — importé par les autres modules #
 lang = LanguageManager()
 
 
-# ──────────────────────────────────────────
-#  Test rapide
-# ──────────────────────────────────────────
+# Test rapide #  
 if __name__ == "__main__":
     print("=== Test language_manager.py ===\n")
 
@@ -182,4 +174,4 @@ if __name__ == "__main__":
     lm.toggle()
     print(f"  Après  : {lm.current}")
 
-    print("\n✅ Tout fonctionne !")
+    print("\n Tout fonctionne !")

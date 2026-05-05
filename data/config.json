@@ -6,7 +6,7 @@
     "fps": 60
   },
   "game": {
-    "max_errors": 6,
+    "max_errors": 10,
     "default_difficulty": "medium",
     "language": "fr"
   },

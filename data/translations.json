@@ -13,7 +13,10 @@
       "choose_difficulty": "Choisir la difficulté",
       "choose_category": "Choisir une catégorie",
       "choose_language": "Langue",
-      "all_categories": "Toutes"
+      "all_categories": "Toutes",
+      "easy": "Facile",
+      "medium": "Moyen",
+      "hard": "Difficile"
     },
     "difficulty": {
       "label": "Difficulté",
@@ -87,7 +90,10 @@
       "choose_difficulty": "Choose difficulty",
       "choose_category": "Choose a category",
       "choose_language": "Language",
-      "all_categories": "All"
+      "all_categories": "All",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
     },
     "difficulty": {
       "label": "Difficulty",

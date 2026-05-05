@@ -4,9 +4,11 @@ import sys
 from word_manager import get_random_word, save_score, load_config
 from language_manager import lang
 
-# ══════════════════════════════════════════════════════════════
-#  INIT
-# ══════════════════════════════════════════════════════════════
+SCREEN_MENU = "menu"
+SCREEN_DIFFICULTY = "difficulty"
+SCREEN_GAME = "game"
+
+# INIT # 
 pygame.init()
 pygame.font.init()
 
@@ -31,9 +33,7 @@ pygame.display.set_caption(lang.t("menu.title"))
 clock  = pygame.time.Clock()
 
 
-# ══════════════════════════════════════════════════════════════
-#  POLICES
-# ══════════════════════════════════════════════════════════════
+# POLICES #   
 def font(size, bold=False):
     for name in ("Segoe UI", "Arial", "DejaVu Sans", ""):
         f = pygame.font.SysFont(name, size, bold=bold)
@@ -49,9 +49,7 @@ F_SMALL  = font(19)
 F_TINY   = font(15)
 
 
-# ══════════════════════════════════════════════════════════════
-#  UTILITAIRES DE RENDU
-# ══════════════════════════════════════════════════════════════
+# UTILITAIRES DE RENDU #   
 def draw_text(surf, text, fnt, color, cx, cy):
     s = fnt.render(text, True, color)
     surf.blit(s, (cx - s.get_width() // 2, cy - s.get_height() // 2))
@@ -68,39 +66,39 @@ def draw_button(surf, text, fnt, cx, cy, w, h, color, hover=False):
     return rect
 
 
-# ══════════════════════════════════════════════════════════════
-#  DESSIN DU PENDU
-# ══════════════════════════════════════════════════════════════
+# DESSIN DU PENDU #   
 def draw_hangman(surf, errors):
     gx = WIN_W // 5
     gy = 60
     lw = 4
 
-    pygame.draw.line(surf, COL_GALLOWS, (gx-55, gy+340), (gx+55, gy+340), lw+1)
-    pygame.draw.line(surf, COL_GALLOWS, (gx,    gy+340), (gx,    gy),      lw)
-    pygame.draw.line(surf, COL_GALLOWS, (gx,    gy),     (gx+140, gy),     lw)
-    pygame.draw.line(surf, COL_GALLOWS, (gx+140, gy),    (gx+140, gy+60),  lw)
-
+    if errors >= 1:
+        pygame.draw.line(surf, COL_GALLOWS, (gx-55, gy+340), (gx+55, gy+340), lw+1)
+    if errors >= 2:
+        pygame.draw.line(surf, COL_GALLOWS, (gx,    gy+340), (gx,    gy),      lw)
+    if errors >= 3:
+        pygame.draw.line(surf, COL_GALLOWS, (gx,    gy),     (gx+140, gy),     lw)
+    if errors >= 4:
+        pygame.draw.line(surf, COL_GALLOWS, (gx+140, gy),    (gx+140, gy+60),  lw)
+    
     cx     = gx + 140
     head_y = gy + 60
 
-    if errors >= 1:
-        pygame.draw.circle(surf, COL_HANGMAN, (cx, head_y+24), 24, lw)
-    if errors >= 2:
-        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+48),  (cx, head_y+130),      lw)
-    if errors >= 3:
-        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+68),  (cx-40, head_y+105),   lw)
-    if errors >= 4:
-        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+68),  (cx+40, head_y+105),   lw)
     if errors >= 5:
-        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+130), (cx-36, head_y+178),   lw)
+        pygame.draw.circle(surf, COL_HANGMAN, (cx, head_y+24), 24, lw)
     if errors >= 6:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+48),  (cx, head_y+130),      lw)
+    if errors >= 7:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+68),  (cx-40, head_y+105),   lw)
+    if errors >= 8:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+68),  (cx+40, head_y+105),   lw)
+    if errors >= 9:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+130), (cx-36, head_y+178),   lw)
+    if errors >= 10:
         pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+130), (cx+36, head_y+178),   lw)
 
 
-# ══════════════════════════════════════════════════════════════
-#  ÉTAT DU JEU
-# ══════════════════════════════════════════════════════════════
+# ÉTAT DU JEU #   
 class GameState:
     def __init__(self, difficulty="medium"):
         self.reset(difficulty)
@@ -154,30 +152,36 @@ class GameState:
                 self.attempts, self.errors, self.duration)
 
 
-# ══════════════════════════════════════════════════════════════
-#  ÉCRAN : MENU PRINCIPAL
-# ══════════════════════════════════════════════════════════════
+# ÉCRAN : MENU PRINCIPAL #   
 class MenuScreen:
     def __init__(self):
         self._btn_play = None
         self._btn_lang = None
         self._btn_quit = None
+        self.difficulty = "medium"
 
     def handle(self, event):
+        # ✔️ On ne touche à event.pos QUE si c’est un clic souris
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mx, my = event.pos
+
             if self._btn_play and self._btn_play.collidepoint(mx, my):
                 return "play"
+
             if self._btn_lang and self._btn_lang.collidepoint(mx, my):
                 lang.toggle()
                 pygame.display.set_caption(lang.t("menu.title"))
+
             if self._btn_quit and self._btn_quit.collidepoint(mx, my):
                 return "quit"
+
+        # ✔️ clavier séparé (sans event.pos)
         if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_RETURN, pygame.K_SPACE):
                 return "play"
             if event.key == pygame.K_ESCAPE:
                 return "quit"
+
         return None
 
     def draw(self, surf):
@@ -219,9 +223,9 @@ class MenuScreen:
         pygame.display.flip()
 
 
-# ══════════════════════════════════════════════════════════════
+#   
 #  ÉCRAN : JEU
-# ══════════════════════════════════════════════════════════════
+#   
 class GameScreen:
     def __init__(self, difficulty="medium"):
         self.gs          = GameState(difficulty)
@@ -348,11 +352,12 @@ class GameScreen:
                   F_TINY, COL_MUTED, bcx, WIN_H - 22)
 
 
-# ══════════════════════════════════════════════════════════════
-#  BOUCLE PRINCIPALE
-# ══════════════════════════════════════════════════════════════
+# BOUCLE PRINCIPALE #   
 def main():
-    current = MenuScreen()
+    screen_state = SCREEN_MENU
+    menu = MenuScreen()
+    difficulty = "medium"
+    game = None
 
     while True:
         for event in pygame.event.get():
@@ -360,25 +365,115 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-            result = current.handle(event)
+            #  MENU PRINCIPAL  
+            if screen_state == SCREEN_MENU:
+                result = menu.handle(event)
 
-            if isinstance(current, MenuScreen):
                 if result == "play":
-                    current = GameScreen(config["game"]["default_difficulty"])
+                    screen_state = SCREEN_DIFFICULTY
+
                 elif result == "quit":
                     pygame.quit()
                     sys.exit()
 
-            elif isinstance(current, GameScreen):
+            #   DIFFICULTÉ  
+            elif screen_state == SCREEN_DIFFICULTY:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mx, my = event.pos
+
+                    if menu._btn_easy and menu._btn_easy.collidepoint(mx, my):
+                        difficulty = "easy"
+                        game = GameScreen(difficulty)
+                        screen_state = SCREEN_GAME
+
+                    elif menu._btn_medium and menu._btn_medium.collidepoint(mx, my):
+                        difficulty = "medium"
+                        game = GameScreen(difficulty)
+                        screen_state = SCREEN_GAME
+
+                    elif menu._btn_hard and menu._btn_hard.collidepoint(mx, my):
+                        difficulty = "hard"
+                        game = GameScreen(difficulty)
+                        screen_state = SCREEN_GAME
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    screen_state = SCREEN_MENU
+
+            #   JEU  
+            elif screen_state == SCREEN_GAME:
+                result = game.handle(event)
+
                 if result == "menu":
-                    current = MenuScreen()
+                    screen_state = SCREEN_MENU
+
                 elif result == "quit":
                     pygame.quit()
                     sys.exit()
 
-        current.draw(screen)
+        #   DRAW  
+        if screen_state == SCREEN_MENU:
+            menu.draw(screen)
+
+        elif screen_state == SCREEN_DIFFICULTY:
+            draw_difficulty_screen(menu, screen)
+
+        elif screen_state == SCREEN_GAME:
+            game.draw(screen)
+
         clock.tick(FPS)
 
+def draw_difficulty_screen(menu, surf):
+    surf.fill(COL_BG)
+    mx, my = pygame.mouse.get_pos()
+    bcx = WIN_W // 2
+
+    draw_text(surf, lang.t("menu.choose_difficulty"),
+              F_HUGE, COL_ACCENT, bcx, WIN_H // 4)
+
+    # bouton faciles 
+    bw, bh = 220, 70
+    y = WIN_H // 2 - 60
+
+    menu._btn_easy = draw_button(
+        surf,
+        lang.t("menu.easy"),
+        F_MEDIUM,
+        bcx,
+        y,
+        bw,
+        bh,
+        COL_SUCCESS,
+        False
+    )
+
+    menu._btn_medium = draw_button(
+        surf,
+        lang.t("menu.medium"),
+        F_MEDIUM,
+        bcx,
+        y + 100,
+        bw,
+        bh,
+        COL_ACCENT,
+        False
+    )
+
+    menu._btn_hard = draw_button(
+        surf,
+        lang.t("menu.hard"),
+        F_MEDIUM,
+        bcx,
+        y + 200,
+        bw,
+        bh,
+        COL_ERROR,
+        False
+    )
+
+    draw_text(surf, "ESC → Menu",
+              F_TINY, COL_MUTED, bcx, WIN_H - 30)
+
+    pygame.display.flip()
 
 if __name__ == "__main__":
     main()
