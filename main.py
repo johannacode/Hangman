@@ -1,256 +1,382 @@
 import pygame
 import sys
-import os
 
-# ── Modules du projet ──────────────────────────────────────────
 from word_manager import get_random_word, save_score, load_config
 from language_manager import lang
 
-# ── Initialisation pygame ──────────────────────────────────────
+# ══════════════════════════════════════════════════════════════
+#  INIT
+# ══════════════════════════════════════════════════════════════
 pygame.init()
 pygame.font.init()
 
-# ── Chargement de la config ────────────────────────────────────
 config  = load_config()
-WIN_W   = config["window"]["width"]       # 600
-WIN_H   = config["window"]["height"]      # 600
-TITLE   = config["window"]["title"]       # "Le Pendu"
-FPS     = config["window"]["fps"]         # 60
-MAX_ERR = config["game"]["max_errors"]    # 6
+WIN_W   = config["window"]["width"]
+WIN_H   = config["window"]["height"]
+FPS     = config["window"]["fps"]
+MAX_ERR = config["game"]["max_errors"]
 
 C = config["colors"]
-COL_BG       = tuple(C["background"])    # (30, 30, 46)
-COL_TEXT      = tuple(C["text_primary"]) # (205, 214, 244)
-COL_MUTED     = tuple(C["text_secondary"])
-COL_ACCENT    = tuple(C["accent"])
-COL_SUCCESS   = tuple(C["success"])
-COL_ERROR     = tuple(C["error"])
-COL_HANGMAN   = tuple(C["hangman"])
-COL_GALLOWS   = tuple(C["gallows"])
+COL_BG      = tuple(C["background"])
+COL_TEXT    = tuple(C["text_primary"])
+COL_MUTED   = tuple(C["text_secondary"])
+COL_ACCENT  = tuple(C["accent"])
+COL_SUCCESS = tuple(C["success"])
+COL_ERROR   = tuple(C["error"])
+COL_HANGMAN = tuple(C["hangman"])
+COL_GALLOWS = tuple(C["gallows"])
 
-# ── Fenêtre ────────────────────────────────────────────────────
 screen = pygame.display.set_mode((WIN_W, WIN_H))
 pygame.display.set_caption(lang.t("menu.title"))
 clock  = pygame.time.Clock()
 
-# ── Polices ────────────────────────────────────────────────────
-FONT_TITLE  = pygame.font.SysFont("segoeui",  42, bold=True)
-FONT_WORD   = pygame.font.SysFont("segoeui",  38, bold=True)
-FONT_HINT   = pygame.font.SysFont("segoeui",  20)
-FONT_SMALL  = pygame.font.SysFont("segoeui",  17)
-FONT_MSG    = pygame.font.SysFont("segoeui",  26, bold=True)
-FONT_BTN    = pygame.font.SysFont("segoeui",  19)
+
+# ══════════════════════════════════════════════════════════════
+#  POLICES
+# ══════════════════════════════════════════════════════════════
+def font(size, bold=False):
+    for name in ("Segoe UI", "Arial", "DejaVu Sans", ""):
+        f = pygame.font.SysFont(name, size, bold=bold)
+        if f:
+            return f
+    return pygame.font.Font(None, size)
+
+F_HUGE   = font(72, bold=True)
+F_TITLE  = font(48, bold=True)
+F_LARGE  = font(34, bold=True)
+F_MEDIUM = font(24)
+F_SMALL  = font(19)
+F_TINY   = font(15)
+
+
+# ══════════════════════════════════════════════════════════════
+#  UTILITAIRES DE RENDU
+# ══════════════════════════════════════════════════════════════
+def draw_text(surf, text, fnt, color, cx, cy):
+    s = fnt.render(text, True, color)
+    surf.blit(s, (cx - s.get_width() // 2, cy - s.get_height() // 2))
+    return s.get_width(), s.get_height()
+
+
+def draw_button(surf, text, fnt, cx, cy, w, h, color, hover=False):
+    rect = pygame.Rect(cx - w // 2, cy - h // 2, w, h)
+    bg   = (color[0]//3, color[1]//3, color[2]//3) if not hover else \
+           (min(color[0]+40, 255), min(color[1]+40, 255), min(color[2]+40, 255))
+    pygame.draw.rect(surf, bg, rect, border_radius=10)
+    pygame.draw.rect(surf, color, rect, 2, border_radius=10)
+    draw_text(surf, text, fnt, color, cx, cy)
+    return rect
 
 
 # ══════════════════════════════════════════════════════════════
 #  DESSIN DU PENDU
 # ══════════════════════════════════════════════════════════════
-def draw_hangman(surface: pygame.Surface, errors: int) -> None:
-    """Dessine la potence et le bonhomme selon le nb d'erreurs (0-6)."""
-    gx, gy = 90, 80   # origine de la potence
-    lw = 3             # épaisseur trait
+def draw_hangman(surf, errors):
+    gx = WIN_W // 5
+    gy = 60
+    lw = 4
 
-    # ── Potence (toujours visible) ──────────────────────────────
-    # socle
-    pygame.draw.line(surface, COL_GALLOWS, (gx - 40, gy + 290), (gx + 40, gy + 290), lw + 1)
-    # montant vertical
-    pygame.draw.line(surface, COL_GALLOWS, (gx, gy + 290), (gx, gy), lw)
-    # bras horizontal
-    pygame.draw.line(surface, COL_GALLOWS, (gx, gy), (gx + 120, gy), lw)
-    # corde
-    pygame.draw.line(surface, COL_GALLOWS, (gx + 120, gy), (gx + 120, gy + 50), lw)
+    pygame.draw.line(surf, COL_GALLOWS, (gx-55, gy+340), (gx+55, gy+340), lw+1)
+    pygame.draw.line(surf, COL_GALLOWS, (gx,    gy+340), (gx,    gy),      lw)
+    pygame.draw.line(surf, COL_GALLOWS, (gx,    gy),     (gx+140, gy),     lw)
+    pygame.draw.line(surf, COL_GALLOWS, (gx+140, gy),    (gx+140, gy+60),  lw)
 
-    cx = gx + 120   # centre horizontal du bonhomme
-    head_y = gy + 50
+    cx     = gx + 140
+    head_y = gy + 60
 
-    if errors >= 1:   # tête
-        pygame.draw.circle(surface, COL_HANGMAN, (cx, head_y + 18), 18, lw)
-    if errors >= 2:   # corps
-        pygame.draw.line(surface, COL_HANGMAN, (cx, head_y + 36), (cx, head_y + 100), lw)
-    if errors >= 3:   # bras gauche
-        pygame.draw.line(surface, COL_HANGMAN, (cx, head_y + 52), (cx - 30, head_y + 80), lw)
-    if errors >= 4:   # bras droit
-        pygame.draw.line(surface, COL_HANGMAN, (cx, head_y + 52), (cx + 30, head_y + 80), lw)
-    if errors >= 5:   # jambe gauche
-        pygame.draw.line(surface, COL_HANGMAN, (cx, head_y + 100), (cx - 28, head_y + 138), lw)
-    if errors >= 6:   # jambe droite — game over
-        pygame.draw.line(surface, COL_HANGMAN, (cx, head_y + 100), (cx + 28, head_y + 138), lw)
+    if errors >= 1:
+        pygame.draw.circle(surf, COL_HANGMAN, (cx, head_y+24), 24, lw)
+    if errors >= 2:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+48),  (cx, head_y+130),      lw)
+    if errors >= 3:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+68),  (cx-40, head_y+105),   lw)
+    if errors >= 4:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+68),  (cx+40, head_y+105),   lw)
+    if errors >= 5:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+130), (cx-36, head_y+178),   lw)
+    if errors >= 6:
+        pygame.draw.line(surf, COL_HANGMAN, (cx, head_y+130), (cx+36, head_y+178),   lw)
 
 
 # ══════════════════════════════════════════════════════════════
 #  ÉTAT DU JEU
 # ══════════════════════════════════════════════════════════════
 class GameState:
-    def __init__(self):
-        self.reset()
+    def __init__(self, difficulty="medium"):
+        self.reset(difficulty)
 
-    def reset(self, difficulty: str = "medium"):
-        word, diff, cat        = get_random_word(difficulty, language=lang.current)
-        self.word:       str   = word           # "PYTHON"
-        self.difficulty: str   = diff
-        self.category:   str   = cat
-        self.guessed:    set   = set()          # lettres déjà jouées
-        self.errors:     int   = 0
-        self.status:     str   = "playing"      # "playing" | "win" | "lose"
-        self.message:    str   = ""             # feedback rapide
-        self.msg_timer:  int   = 0              # frames restantes pour afficher msg
-        self.start_tick: int   = pygame.time.get_ticks()
-        self.duration:   int   = 0              # secondes à la fin
+    def reset(self, difficulty="medium"):
+        word, diff, cat = get_random_word(difficulty, language=lang.current)
+        self.word       = word
+        self.difficulty = diff
+        self.category   = cat
+        self.guessed    = set()
+        self.errors     = 0
+        self.status     = "playing"
+        self.message    = ""
+        self.msg_timer  = 0
+        self.is_record  = False
+        self.start_tick = pygame.time.get_ticks()
+        self.duration   = 0
 
     @property
-    def attempts(self) -> int:
+    def attempts(self):
         return len(self.guessed)
 
-    def masked_word(self) -> str:
-        """Retourne le mot avec _ pour les lettres non trouvées."""
+    def masked_word(self):
         return "  ".join(c if c in self.guessed else "_" for c in self.word)
 
-    def try_letter(self, letter: str) -> None:
+    def try_letter(self, letter):
         letter = letter.upper()
         if not letter.isalpha() or letter in self.guessed:
             self.message   = lang.t("game.already_tried")
             self.msg_timer = 90
             return
-
         self.guessed.add(letter)
-
         if letter in self.word:
             self.message   = lang.t("game.good_guess")
             self.msg_timer = 60
             if all(c in self.guessed for c in self.word):
-                self._end("win")
+                self._finish("win")
         else:
             self.errors   += 1
             self.message   = lang.t("game.wrong_guess")
             self.msg_timer = 60
             if self.errors >= MAX_ERR:
-                self._end("lose")
+                self._finish("lose")
 
-    def _end(self, result: str) -> None:
+    def _finish(self, result):
         self.status   = result
-        elapsed       = pygame.time.get_ticks() - self.start_tick
-        self.duration = elapsed // 1000
+        self.duration = (pygame.time.get_ticks() - self.start_tick) // 1000
         if result == "win":
-            save_score(self.word, self.difficulty, self.category,
-                       self.attempts, self.errors, self.duration)
+            self.is_record = save_score(
+                self.word, self.difficulty, self.category,
+                self.attempts, self.errors, self.duration)
 
 
 # ══════════════════════════════════════════════════════════════
-#  RENDU
+#  ÉCRAN : MENU PRINCIPAL
 # ══════════════════════════════════════════════════════════════
-def render(surface: pygame.Surface, gs: GameState) -> None:
-    surface.fill(COL_BG)
+class MenuScreen:
+    def __init__(self):
+        self._btn_play = None
+        self._btn_lang = None
+        self._btn_quit = None
 
-    # ── Pendu ──────────────────────────────────────────────────
-    draw_hangman(surface, gs.errors)
+    def handle(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mx, my = event.pos
+            if self._btn_play and self._btn_play.collidepoint(mx, my):
+                return "play"
+            if self._btn_lang and self._btn_lang.collidepoint(mx, my):
+                lang.toggle()
+                pygame.display.set_caption(lang.t("menu.title"))
+            if self._btn_quit and self._btn_quit.collidepoint(mx, my):
+                return "quit"
+        if event.type == pygame.KEYDOWN:
+            if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                return "play"
+            if event.key == pygame.K_ESCAPE:
+                return "quit"
+        return None
 
-    # ── Infos en haut à droite ─────────────────────────────────
-    err_color = COL_ERROR if gs.errors >= MAX_ERR - 1 else COL_MUTED
-    err_text  = FONT_SMALL.render(
-        f"{lang.t('game.errors')} : {gs.errors} / {MAX_ERR}", True, err_color)
-    surface.blit(err_text, (WIN_W - err_text.get_width() - 20, 20))
+    def draw(self, surf):
+        surf.fill(COL_BG)
+        mx, my = pygame.mouse.get_pos()
+        bcx    = WIN_W // 2
+        bw, bh = 300, 62
 
-    hint_text = FONT_SMALL.render(
-        f"{lang.t('game.hint')} : {lang.category_name(gs.category)}", True, COL_MUTED)
-    surface.blit(hint_text, (WIN_W - hint_text.get_width() - 20, 46))
+        # Titre
+        draw_text(surf, lang.t("menu.title"), F_HUGE, COL_ACCENT, bcx, WIN_H // 4)
 
-    lang_text = FONT_SMALL.render(lang.flag() + " " + lang.language_name(), True, COL_MUTED)
-    surface.blit(lang_text, (WIN_W - lang_text.get_width() - 20, WIN_H - 36))
+        # Sous-titre
+        draw_text(surf, "— " + lang.t("menu.choose_difficulty") + " —",
+                  F_SMALL, COL_MUTED, bcx, WIN_H // 4 + 75)
 
-    # ── Mot masqué ─────────────────────────────────────────────
-    word_color = COL_SUCCESS if gs.status == "win" else (
-                 COL_ERROR   if gs.status == "lose" else COL_TEXT)
-    word_surf  = FONT_WORD.render(gs.masked_word(), True, word_color)
-    wx = (WIN_W - word_surf.get_width()) // 2
-    surface.blit(word_surf, (wx, WIN_H - 180))
+        # Bouton Jouer
+        y1 = WIN_H // 2 + 10
+        h1 = pygame.Rect(bcx-bw//2, y1-bh//2, bw, bh).collidepoint(mx, my)
+        self._btn_play = draw_button(surf, lang.t("menu.play"),
+                                     F_LARGE, bcx, y1, bw, bh, COL_ACCENT, h1)
 
-    # ── Lettres déjà jouées ────────────────────────────────────
-    played = "  ".join(sorted(gs.guessed))
-    played_surf = FONT_HINT.render(played, True, COL_MUTED)
-    surface.blit(played_surf, ((WIN_W - played_surf.get_width()) // 2, WIN_H - 130))
+        # Bouton Langue
+        y2 = y1 + 90
+        label = lang.flag() + "  " + lang.language_name()
+        h2 = pygame.Rect(bcx-bw//2, y2-bh//2, bw, bh).collidepoint(mx, my)
+        self._btn_lang = draw_button(surf, label,
+                                     F_MEDIUM, bcx, y2, bw, bh, COL_MUTED, h2)
 
-    # ── Feedback rapide ────────────────────────────────────────
-    if gs.msg_timer > 0:
-        alpha    = min(255, gs.msg_timer * 5)
-        msg_col  = COL_SUCCESS if lang.t("game.good_guess") in gs.message else COL_ERROR
-        msg_surf = FONT_MSG.render(gs.message, True, msg_col)
-        msg_surf.set_alpha(alpha)
-        surface.blit(msg_surf, ((WIN_W - msg_surf.get_width()) // 2, WIN_H - 230))
-        gs.msg_timer -= 1
+        # Bouton Quitter
+        y3 = y2 + 82
+        h3 = pygame.Rect(bcx-bw//2, y3-bh//2, bw, bh).collidepoint(mx, my)
+        self._btn_quit = draw_button(surf, lang.t("menu.quit"),
+                                     F_MEDIUM, bcx, y3, bw, bh, COL_ERROR, h3)
 
-    # ── Écran fin de partie ────────────────────────────────────
-    if gs.status != "playing":
-        _render_end_screen(surface, gs)
+        # Astuce bas de page
+        draw_text(surf, "Entrée · Jouer    Échap · Quitter",
+                  F_TINY, COL_MUTED, bcx, WIN_H - 22)
 
-    pygame.display.flip()
+        pygame.display.flip()
 
 
-def _render_end_screen(surface: pygame.Surface, gs: GameState) -> None:
-    """Superpose un panneau de résultat transparent."""
-    overlay = pygame.Surface((WIN_W, WIN_H), pygame.SRCALPHA)
-    overlay.fill((0, 0, 0, 160))
-    surface.blit(overlay, (0, 0))
+# ══════════════════════════════════════════════════════════════
+#  ÉCRAN : JEU
+# ══════════════════════════════════════════════════════════════
+class GameScreen:
+    def __init__(self, difficulty="medium"):
+        self.gs          = GameState(difficulty)
+        self._btn_replay = None
+        self._btn_menu   = None
+        self._btn_quit   = None
 
-    if gs.status == "win":
-        title_col = COL_SUCCESS
-        title_txt = lang.t("result.win_title")
-        sub_txt   = f"{lang.t('result.win_message')} : {gs.word}"
-    else:
-        title_col = COL_ERROR
-        title_txt = lang.t("result.lose_title")
-        sub_txt   = f"{lang.t('result.lose_message')} : {gs.word}"
+    def handle(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                return "menu"
+            if self.gs.status != "playing":
+                if event.key == pygame.K_r:
+                    self.gs.reset(self.gs.difficulty)
+                elif event.key == pygame.K_m:
+                    return "menu"
+                elif event.key == pygame.K_q:
+                    return "quit"
+            elif event.unicode and event.unicode.isalpha():
+                self.gs.try_letter(event.unicode)
 
-    title_surf = FONT_TITLE.render(title_txt, True, title_col)
-    surface.blit(title_surf, ((WIN_W - title_surf.get_width()) // 2, 200))
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mx, my = event.pos
+            if self.gs.status != "playing":
+                if self._btn_replay and self._btn_replay.collidepoint(mx, my):
+                    self.gs.reset(self.gs.difficulty)
+                elif self._btn_menu and self._btn_menu.collidepoint(mx, my):
+                    return "menu"
+                elif self._btn_quit and self._btn_quit.collidepoint(mx, my):
+                    return "quit"
+        return None
 
-    sub_surf = FONT_HINT.render(sub_txt, True, COL_TEXT)
-    surface.blit(sub_surf, ((WIN_W - sub_surf.get_width()) // 2, 260))
+    def draw(self, surf):
+        surf.fill(COL_BG)
+        gs     = self.gs
+        mx, my = pygame.mouse.get_pos()
 
-    attempts_surf = FONT_HINT.render(
-        lang.t("result.attempts_label", n=gs.attempts), True, COL_MUTED)
-    surface.blit(attempts_surf, ((WIN_W - attempts_surf.get_width()) // 2, 292))
+        # Pendu (moitié gauche)
+        draw_hangman(surf, gs.errors)
 
-    # Boutons [R] Rejouer  [M] Menu  (simulés en texte pour l'instant)
-    replay_surf = FONT_BTN.render(lang.t("result.play_again"), True, COL_ACCENT)
-    surface.blit(replay_surf, ((WIN_W - replay_surf.get_width()) // 2, 360))
+        # Zone droite
+        rx  = WIN_W // 2 + 30
+        rw  = WIN_W - rx - 30
+        rcx = rx + rw // 2
 
-    quit_surf = FONT_BTN.render(lang.t("result.quit"), True, COL_MUTED)
-    surface.blit(quit_surf, ((WIN_W - quit_surf.get_width()) // 2, 396))
+        draw_text(surf, f"{lang.t('game.errors')} : {gs.errors} / {MAX_ERR}",
+                  F_SMALL,
+                  COL_ERROR if gs.errors >= MAX_ERR - 1 else COL_MUTED,
+                  rcx, 38)
+
+        draw_text(surf,
+                  f"{lang.t('game.hint')} : {lang.category_name(gs.category)}",
+                  F_SMALL, COL_MUTED, rcx, 70)
+
+        # Mot masqué
+        word_col = COL_SUCCESS if gs.status == "win" else \
+                   COL_ERROR   if gs.status == "lose" else COL_TEXT
+        draw_text(surf, gs.masked_word(), F_LARGE, word_col, rcx, WIN_H // 2 - 30)
+
+        # Lettres jouées
+        draw_text(surf, "  ".join(sorted(gs.guessed)),
+                  F_MEDIUM, COL_MUTED, rcx, WIN_H // 2 + 30)
+
+        # Feedback
+        if gs.msg_timer > 0:
+            msg_col = COL_SUCCESS if lang.t("game.good_guess") in gs.message else COL_ERROR
+            msg_s   = F_MEDIUM.render(gs.message, True, msg_col)
+            msg_s.set_alpha(min(255, gs.msg_timer * 5))
+            surf.blit(msg_s, (rcx - msg_s.get_width()//2, WIN_H//2 - 90))
+            gs.msg_timer -= 1
+
+        # Langue + aide
+        draw_text(surf, lang.flag() + " " + lang.language_name(),
+                  F_TINY, COL_MUTED, 55, WIN_H - 18)
+        draw_text(surf, "Échap → Menu", F_TINY, COL_MUTED, WIN_W - 65, WIN_H - 18)
+
+        # Résultat
+        if gs.status != "playing":
+            self._draw_result(surf, gs, mx, my)
+
+        pygame.display.flip()
+
+    def _draw_result(self, surf, gs, mx, my):
+        overlay = pygame.Surface((WIN_W, WIN_H), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 170))
+        surf.blit(overlay, (0, 0))
+
+        cy  = WIN_H // 2 - 130
+        bcx = WIN_W // 2
+        bw, bh = 250, 54
+
+        if gs.status == "win":
+            draw_text(surf, lang.t("result.win_title"),  F_TITLE, COL_SUCCESS, bcx, cy)
+            draw_text(surf, f"{lang.t('result.win_message')} : {gs.word}",
+                      F_MEDIUM, COL_TEXT, bcx, cy + 68)
+        else:
+            draw_text(surf, lang.t("result.lose_title"), F_TITLE, COL_ERROR,   bcx, cy)
+            draw_text(surf, f"{lang.t('result.lose_message')} : {gs.word}",
+                      F_MEDIUM, COL_TEXT, bcx, cy + 68)
+
+        draw_text(surf, lang.t("result.attempts_label", n=gs.attempts),
+                  F_SMALL, COL_MUTED, bcx, cy + 106)
+
+        if gs.is_record:
+            draw_text(surf, lang.t("result.new_record"),
+                      F_MEDIUM, COL_ACCENT, bcx, cy + 138)
+
+        y_r = cy + 200
+        h1  = pygame.Rect(bcx-bw//2, y_r-bh//2, bw, bh).collidepoint(mx, my)
+        self._btn_replay = draw_button(surf, lang.t("result.play_again"),
+                                       F_MEDIUM, bcx, y_r, bw, bh, COL_ACCENT, h1)
+
+        y_m = y_r + 70
+        h2  = pygame.Rect(bcx-bw//2, y_m-bh//2, bw, bh).collidepoint(mx, my)
+        self._btn_menu = draw_button(surf, lang.t("result.main_menu"),
+                                     F_MEDIUM, bcx, y_m, bw, bh, COL_MUTED, h2)
+
+        y_q = y_m + 64
+        h3  = pygame.Rect(bcx-bw//2, y_q-bh//2, bw, bh).collidepoint(mx, my)
+        self._btn_quit = draw_button(surf, lang.t("result.quit"),
+                                     F_MEDIUM, bcx, y_q, bw, bh, COL_ERROR, h3)
+
+        draw_text(surf, "R · Rejouer    M · Menu    Q · Quitter",
+                  F_TINY, COL_MUTED, bcx, WIN_H - 22)
 
 
 # ══════════════════════════════════════════════════════════════
 #  BOUCLE PRINCIPALE
 # ══════════════════════════════════════════════════════════════
 def main():
-    gs = GameState()
+    current = MenuScreen()
 
     while True:
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.KEYDOWN:
+            result = current.handle(event)
 
-                # ── Raccourcis globaux ─────────────────────────
-                if event.key == pygame.K_ESCAPE:
+            if isinstance(current, MenuScreen):
+                if result == "play":
+                    current = GameScreen(config["game"]["default_difficulty"])
+                elif result == "quit":
                     pygame.quit()
                     sys.exit()
 
-                # ── Fin de partie ──────────────────────────────
-                if gs.status != "playing":
-                    if event.key == pygame.K_r:           # Rejouer
-                        gs.reset(gs.difficulty)
-                    elif event.key == pygame.K_q:         # Quitter
-                        pygame.quit()
-                        sys.exit()
+            elif isinstance(current, GameScreen):
+                if result == "menu":
+                    current = MenuScreen()
+                elif result == "quit":
+                    pygame.quit()
+                    sys.exit()
 
-                # ── En jeu : saisie d'une lettre ───────────────
-                elif event.unicode and event.unicode.isalpha():
-                    gs.try_letter(event.unicode)
-
-        render(screen, gs)
+        current.draw(screen)
         clock.tick(FPS)
 
 

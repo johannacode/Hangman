@@ -1,15 +1,14 @@
 {
   "window": {
-    "width": 600,
-    "height": 600,
+    "width": 900,
+    "height": 650,
     "title": "Le Pendu",
     "fps": 60
   },
   "game": {
     "max_errors": 6,
     "default_difficulty": "medium",
-    "language": "fr",
-    "language": "en"
+    "language": "fr"
   },
   "colors": {
     "background": [
